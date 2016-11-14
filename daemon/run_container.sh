@@ -16,20 +16,18 @@ dnf install -y \
 systemctl enable libvirtd
 systemctl enable virtlockd 
 
-# Enable TCP only if not embedded
-if [ -z ${EMBEDDED} ]; then
-    cat >> /etc/libvirt/libvirtd.conf << DELIM
+# Enable TCP only if client not included
+if [ -z ${INCLUDECLIENT} ]; then
+    cat >> /etc/libvirt/libvirtd.conf << EOF
 listen_tls = 0
 listen_tcp = 1
 tls_port = "${TLS_PORT}"
 tcp_port = "${TCP_PORT}"
 auth_tcp = "${AUTH_TCP}"
-DELIM
-
+EOF
     echo 'LIBVIRTD_ARGS="--listen"' >> /etc/sysconfig/libvirtd
 else
-    # if embeded install client stuff
-    yum -y install virt-viewer virt-install libvirt-client
+    dnf install -y virt-viewer virt-install libvirt-client
 fi
 
 # Edit the service file which includes ExecStartPost to chmod /dev/kvm
